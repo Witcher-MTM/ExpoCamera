@@ -1,26 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import { Camera } from 'expo-camera';
 
-export default function CameraScreen() {
+export default function App() {
   const [hasPermission, setHasPermission] = useState(null);
-  const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
   const [photo, setPhoto] = useState(null);
+  const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
+
   const cameraRef = useRef(null);
 
   useEffect(() => {
     (async () => {
-      const { status } = await Camera.requestPermissionsAsync();
+      const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
   }, []);
-
-  const takePicture = async () => {
-    if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync();
-      setPhoto(photo);
-    }
-  };
 
   const toggleCamera = () => {
     setCameraType(
@@ -28,6 +22,14 @@ export default function CameraScreen() {
         ? Camera.Constants.Type.front
         : Camera.Constants.Type.back
     );
+  };
+
+  const takePicture = async () => {
+    if (cameraRef.current) {
+      const options = { quality: 0.5, base64: true };
+      const photoData = await cameraRef.current.takePictureAsync(options);
+      setPhoto(photoData);
+    }
   };
 
   const resetCamera = () => {
@@ -70,8 +72,8 @@ export default function CameraScreen() {
       )}
     </View>
   );
-}
 
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
